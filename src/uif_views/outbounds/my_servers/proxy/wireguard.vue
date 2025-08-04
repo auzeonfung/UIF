@@ -10,9 +10,9 @@
       </el-col>
 
       <el-col :xs="24" :sm="12" :md="8" :lg="8" :xl="8">
-        <el-form-item label="local_address">
+        <el-form-item label="address">
           <el-select
-            v-model="outbound_obj.setting.local_address"
+            v-model="outbound_obj.setting.address"
             multiple
             filterable
             allow-create
@@ -42,7 +42,7 @@
       <el-col :xs="24" :sm="12" :md="8" :lg="8" :xl="8">
         <el-form-item label="公钥">
           <el-input
-            v-model="outbound_obj.setting.peer_public_key"
+            v-model="outbound_obj.setting.peers[0].public_key"
             placeholder="必填"
           ></el-input>
         </el-form-item>
@@ -51,17 +51,23 @@
       <el-col :xs="24" :sm="12" :md="8" :lg="8" :xl="8">
         <el-form-item label="pre_shared_key">
           <el-input
-            v-model="outbound_obj.setting.pre_shared_key"
+            v-model="outbound_obj.setting.peers[0].pre_shared_key"
             placeholder="选填"
           ></el-input>
         </el-form-item>
       </el-col>
 
       <el-col :xs="24" :sm="12" :md="8" :lg="8" :xl="8">
-        <el-form-item label="workers">
+        <el-form-item label="system">
+          <el-switch v-model="outbound_obj.setting.system"> </el-switch>
+        </el-form-item>
+      </el-col>
+
+      <el-col :xs="24" :sm="12" :md="8" :lg="8" :xl="8">
+        <el-form-item label="listen_port">
           <el-input
-            v-model.number="outbound_obj.setting.workers"
-            placeholder="必填"
+            v-model.number="outbound_obj.setting.listen_port"
+            placeholder="选填"
             type="number"
           ></el-input>
         </el-form-item>
@@ -76,11 +82,56 @@
           ></el-input>
         </el-form-item>
       </el-col>
+    </el-row>
 
-      <el-col :xs="24" :sm="12" :md="8" :lg="8" :xl="8" v-if="false">
-        <el-form-item label="system_interface">
-          <el-switch v-model="outbound_obj.setting.system_interface">
-          </el-switch>
+    <el-row :gutter="5">
+      <el-col :xs="24" :sm="12" :md="8" :lg="8" :xl="8">
+        <el-form-item label="peer_address">
+          <el-input
+            v-model="outbound_obj.setting.peers[0].address"
+            placeholder="必填"
+          ></el-input>
+        </el-form-item>
+      </el-col>
+
+      <el-col :xs="24" :sm="12" :md="8" :lg="8" :xl="8">
+        <el-form-item label="peer_port">
+          <el-input
+            v-model.number="outbound_obj.setting.peers[0].port"
+            placeholder="必填"
+            type="number"
+          ></el-input>
+        </el-form-item>
+      </el-col>
+
+      <el-col :xs="24" :sm="12" :md="8" :lg="8" :xl="8">
+        <el-form-item label="allowed_ips">
+          <el-select
+            v-model="outbound_obj.setting.peers[0].allowed_ips"
+            multiple
+            filterable
+            allow-create
+            default-first-option
+            placeholder="选填"
+          >
+            <el-option
+              v-for="item in ['0.0.0.0/0', '::/0']"
+              :key="item"
+              :label="item"
+              :value="item"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+      </el-col>
+
+      <el-col :xs="24" :sm="12" :md="8" :lg="8" :xl="8">
+        <el-form-item label="persistent_keepalive_interval">
+          <el-input
+            v-model.number="outbound_obj.setting.peers[0].persistent_keepalive_interval"
+            placeholder="选填"
+            type="number"
+          ></el-input>
         </el-form-item>
       </el-col>
     </el-row>
@@ -89,7 +140,7 @@
       <el-col :xs="24" :sm="12" :md="8" :lg="8" :xl="8">
         <el-form-item label="reserved1">
           <el-input
-            v-model.number="outbound_obj.setting.reserved[0]"
+            v-model.number="outbound_obj.setting.peers[0].reserved[0]"
             placeholder="必填"
           ></el-input>
         </el-form-item>
@@ -98,7 +149,7 @@
       <el-col :xs="24" :sm="12" :md="8" :lg="8" :xl="8">
         <el-form-item label="reserved2">
           <el-input
-            v-model.number="outbound_obj.setting.reserved[1]"
+            v-model.number="outbound_obj.setting.peers[0].reserved[1]"
             placeholder="必填"
           ></el-input>
         </el-form-item>
@@ -107,7 +158,7 @@
       <el-col :xs="24" :sm="12" :md="8" :lg="8" :xl="8">
         <el-form-item label="reserved3">
           <el-input
-            v-model.number="outbound_obj.setting.reserved[2]"
+            v-model.number="outbound_obj.setting.peers[0].reserved[2]"
             placeholder="必填"
           ></el-input>
         </el-form-item>
@@ -129,15 +180,23 @@ export default {
   },
   created() {
     var setting = {
-      interface_name: "",
-      local_address: ["172.16.0.2/32"],
+      name: "",
+      address: ["172.16.0.2/32"],
       private_key: "YNXtAzepDqRv9H52osJVDQnznT5AM11eCK3ESpwSt04=",
-      peer_public_key: "Z1XXLsKYkYxuiYjJIkRvtIKFepCYHTgON+GwPq7SOV4=",
-      pre_shared_key: "",
-      reserved: [0, 0, 0],
-      workers: 4,
-      system_interface: false,
+      listen_port: 0,
+      system: false,
       mtu: 1280,
+      peers: [
+        {
+          public_key: "Z1XXLsKYkYxuiYjJIkRvtIKFepCYHTgON+GwPq7SOV4=",
+          pre_shared_key: "",
+          address: "",
+          port: 0,
+          allowed_ips: [],
+          persistent_keepalive_interval: 0,
+          reserved: [0, 0, 0],
+        },
+      ],
     };
     this.outbound_obj.setting = InitSetting(this.outbound_obj.setting, setting);
   },
@@ -150,6 +209,19 @@ export default {
       GetWarp: "uif/GetWarp",
     }),
     FillWarp() {
+      if (!("peers" in this.outbound_obj.setting)) {
+        this.$set(this.outbound_obj.setting, "peers", [
+          {
+            public_key: "",
+            pre_shared_key: "",
+            address: "",
+            port: 0,
+            allowed_ips: [],
+            persistent_keepalive_interval: 0,
+            reserved: [0, 0, 0],
+          },
+        ]);
+      }
       this.GetWarp();
     },
   },

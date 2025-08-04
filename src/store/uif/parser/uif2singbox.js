@@ -143,11 +143,20 @@ export function Outbound(uif_config) {
   if (protocol == 'freedom') {
     singBoxStyle['type'] = 'direct'
   } else if (protocol != 'block') {
-    singBoxStyle['server'] = uif_config['transport']['address']
-    singBoxStyle['server_port'] = parseInt(uif_config['transport']['port'])
+    if (protocol != 'wireguard') {
+      singBoxStyle['server'] = uif_config['transport']['address'];
+      singBoxStyle['server_port'] = parseInt(uif_config['transport']['port']);
+    }
   }
 
-  if (protocol == 'shadowsocks') {
+  if (protocol == 'wireguard') {
+    if ('peers' in singBoxStyle && singBoxStyle['peers'].length > 0) {
+      var peer = singBoxStyle['peers'][0]
+      if ('pre_shared_key' in peer && peer['pre_shared_key'] == "") {
+        delete peer['pre_shared_key']
+      }
+    }
+  } else if (protocol == 'shadowsocks') {
     if ('plugin' in singBoxStyle) {
       if (singBoxStyle['plugin'] == '') {
         singBoxStyle['plugin_opts'] = ''
