@@ -114,6 +114,7 @@ var template = {
     "independent_cache": true
   },
   "inbounds": [],
+  "endpoints": [],
   "outbounds": [{
     "type": "selector",
     "tag": "proxy",
@@ -327,7 +328,11 @@ export function BuildEnableOutList(res, outbounds) {
     }
     var out = Outbound(item) // parse uif style to sing-box style.
     var tag = out['tag']
-    res['outbounds'].push(out);
+    if (item['protocol'] == 'wireguard') {
+      res['endpoints'].push(out)
+    } else {
+      res['outbounds'].push(out)
+    }
     enabledOutTag.push(tag)
   }
 
@@ -481,6 +486,18 @@ export function SetAllOutboudFreedom(res) {
       continue
     }
     destList.push(address)
+  }
+  for (var item in res['endpoints']) {
+    item = res['endpoints'][item]
+    if (item['type'] != 'wireguard' || !('peers' in item)) {
+      continue
+    }
+    for (var peer in item['peers']) {
+      var p = item['peers'][peer]
+      if ('address' in p) {
+        destList.push(p['address'])
+      }
+    }
   }
   return destList
 }
