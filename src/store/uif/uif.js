@@ -636,16 +636,18 @@ function GetWarp() {
       data = data.data["res"];
       console.log(data);
       console.log(outbound_obj);
+      if (!("peers" in outbound_obj.setting)) {
+        outbound_obj.setting["peers"] = [{}];
+      }
       outbound_obj.setting["private_key"] = data["PrivateKey"];
-      outbound_obj.setting["peer_public_key"] = data["PublicKey"];
-      outbound_obj.setting["peer_public_key"] = data["PublicKey"];
-      outbound_obj.setting["reserved"] = data["ClientID"];
-      outbound_obj.setting["local_address"] = [
+      outbound_obj.setting["address"] = [
         data["Address1"] + "/32",
         data["Address2"] + "/128",
       ];
-      outbound_obj.transport["address"] = data["EndpointAddress"];
-      outbound_obj.transport["port"] = parseInt(data["EndpointPort"]);
+      outbound_obj.setting["peers"][0]["public_key"] = data["PublicKey"];
+      outbound_obj.setting["peers"][0]["reserved"] = data["ClientID"];
+      outbound_obj.setting["peers"][0]["address"] = data["EndpointAddress"];
+      outbound_obj.setting["peers"][0]["port"] = parseInt(data["EndpointPort"]);
 
       Message({
         type: "success",
