@@ -70,6 +70,45 @@ describe('parser:parse to singBoxStyle config', () => {
     expect(res['type']).toBe('direct')
   });
 
+  it('wireguard endpoint', () => {
+    var rawData = {
+      protocol: 'wireguard',
+      tag: 'wg-ep',
+      transport: {
+        protocol: '',
+        setting: {},
+        tls_type: 'none',
+        tls: {},
+        address: '127.0.0.1',
+        port: 10001
+      },
+      setting: {
+        interface_name: 'wg0',
+        local_address: ['10.0.0.2/32'],
+        private_key: '<private_key>',
+        peer_public_key: '<peer_public_key>',
+        pre_shared_key: '<pre_shared_key>',
+        reserved: [0, 0, 0],
+        workers: 4,
+        system_interface: true,
+        mtu: 1408,
+        allowed_ips: ['0.0.0.0/0']
+      }
+    }
+
+    var res = Outbound(rawData)
+    expect(res['type']).toBe('wireguard')
+    expect(res['tag']).toBe('wg-ep')
+    expect(res['system']).toBe(true)
+    expect(res['name']).toBe('wg0')
+    expect(res['address']).toEqual(['10.0.0.2/32'])
+    expect(res['peers'][0]['address']).toBe('127.0.0.1')
+    expect(res['peers'][0]['port']).toBe(10001)
+    expect(res['peers'][0]['public_key']).toBe('<peer_public_key>')
+    expect(res['server']).toBeUndefined()
+    expect(res['server_port']).toBeUndefined()
+  })
+
   it('trojan ws', () => {
     var rawData = {
       protocol: "trojan",
